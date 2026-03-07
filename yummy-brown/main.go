@@ -39,7 +39,7 @@ var menu = []map[string]interface{}{
 		"id":          "yummy-brown",
 		"name":        "Yummy-Brown",
 		"description": "A nutritious yummy brown, coating your tongue with a rich and a hint of sweetness, leaving a satisfying full-bodied feel.",
-		"price":       2500 & 3500,
+		"price":       2500
 		"badge":       "Fan Favourite",
 	},
 	{

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gracy Foodie Production — Order Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brown: #5C2D0A;
+      --brown-mid: #A0522D;
+      --brown-light: #D4956A;
+      --custard: #F5C842;
+      --custard-light: #FFF3B0;
+      --custard-dark: #C8960A;
+      --cream: #FFF8EE;
+      --ink: #1A0A00;
+      --pop-red: #E83A14;
+      --pop-green: #2ECC71;
+      --white: #FFFFFF;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
+
+    header {
+      background: var(--brown); padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    }
+    .logo { font-family: 'Lilita One', cursive; font-size: clamp(1.6rem, 4vw, 2.4rem); color: var(--custard); letter-spacing: 1px; padding: 1rem 0; text-shadow: 3px 3px 0 var(--brown-mid); }
+    .logo span { color: var(--white); }
+    .cart-btn { background: var(--custard); color: var(--brown); border: none; border-radius: 50px; padding: 0.6rem 1.4rem; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 0 var(--custard-dark); }
+    .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--custard-dark); }
+    .cart-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--custard-dark); }
+    #cart-count { background: var(--pop-red); color: white; border-radius: 50%; width: 1.5rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 900; }
+
+    .hero { background: linear-gradient(135deg, var(--brown) 0%, var(--brown-mid) 50%, var(--custard-dark) 100%); padding: 4rem 2rem 5rem; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(245,200,66,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(255,255,255,0.07) 0%, transparent 60%); }
+    .hero-blobs { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; opacity: 0.12; animation: float 6s ease-in-out infinite; }
+    .blob-1 { width: 300px; height: 300px; background: var(--custard); top: -80px; left: -60px; }
+    .blob-2 { width: 200px; height: 200px; background: var(--white); bottom: -40px; right: 10%; animation-delay: 2s; }
+    .blob-3 { width: 150px; height: 150px; background: var(--custard-light); top: 30%; right: -30px; animation-delay: 4s; }
+    @keyframes float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 { font-family: 'Lilita One', cursive; font-size: clamp(2.5rem, 8vw, 5rem); color: var(--custard); line-height: 1.05; text-shadow: 4px 4px 0 rgba(0,0,0,0.3); margin-bottom: 1rem; }
+    .hero h1 span { color: var(--white); }
+    .hero p { color: rgba(255,255,255,0.85); font-size: clamp(1rem, 2.5vw, 1.25rem); font-weight: 600; max-width: 500px; margin: 0 auto 2rem; }
+    .hero-badge { display: inline-block; background: var(--custard); color: var(--brown); font-weight: 900; font-size: 0.9rem; padding: 0.4rem 1.2rem; border-radius: 50px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(245,200,66,0.4); animation: pulse-badge 2s ease-in-out infinite; }
+    @keyframes pulse-badge { 0%, 100% { box-shadow: 0 4px 15px rgba(245,200,66,0.4); } 50% { box-shadow: 0 4px 30px rgba(245,200,66,0.7); } }
+    .wave { display: block; margin-top: -2px; }
+
+    .menu-section { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .section-title { font-family: 'Lilita One', cursive; font-size: clamp(1.8rem, 5vw, 2.8rem); text-align: center; color: var(--brown); margin-bottom: 2.5rem; position: relative; }
+    .section-title::after { content: ''; display: block; width: 80px; height: 5px; background: var(--custard); border-radius: 3px; margin: 0.5rem auto 0; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .menu-card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 30px rgba(92,45,10,0.12); transition: transform 0.25s, box-shadow 0.25s; border: 3px solid transparent; position: relative; }
+    .menu-card:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 16px 40px rgba(92,45,10,0.2); }
+    .card-top { padding: 2.5rem 2rem 1.5rem; text-align: center; position: relative; }
+    .card-top.brown-theme { background: linear-gradient(135deg, #3D1A05, #8B4513); }
+    .card-top.custard-theme { background: linear-gradient(135deg, #C8960A, #F5C842); }
+    .food-emoji { font-size: 5rem; display: block; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); animation: wobble 3s ease-in-out infinite; }
+    @keyframes wobble { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    .card-badge { position: absolute; top: 1rem; right: 1rem; background: var(--pop-red); color: white; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.3rem 0.7rem; border-radius: 50px; }
+    .card-top.custard-theme .card-badge { background: var(--brown); }
+    .food-name { font-family: 'Lilita One', cursive; font-size: 1.7rem; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+    .card-body { padding: 1.5rem 2rem 2rem; }
+    .food-desc { font-size: 0.95rem; color: #555; line-height: 1.6; margin-bottom: 1.5rem; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .food-price { font-family: 'Lilita One', cursive; font-size: 2rem; color: var(--brown); }
+    .food-price span { font-size: 1rem; color: var(--brown-mid); }
+    .qty-control { display: flex; align-items: center; gap: 0.5rem; background: var(--cream); border-radius: 50px; padding: 0.3rem; border: 2px solid #e8d5c0; }
+    .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 1.2rem; font-weight: 900; line-height: 1; display: flex; align-items: center; justify-content: center; transition: transform 0.1s, background 0.15s; }
+    .qty-btn.minus { background: #f0d8c8; color: var(--brown); }
+    .qty-btn.plus { background: var(--brown); color: white; }
+    .qty-btn:hover.plus { background: var(--brown-mid); }
+    .qty-btn:hover.minus { background: var(--brown-light); color: white; }
+    .qty-btn:active { transform: scale(0.9); }
+    .qty-display { font-weight: 900; font-size: 1.1rem; min-width: 28px; text-align: center; color: var(--brown); }
+
+    .order-section { background: white; max-width: 900px; margin: 0 auto 4rem; padding: 2.5rem 2rem; border-radius: 24px; box-shadow: 0 8px 30px rgba(92,45,10,0.1); border: 3px solid var(--custard); }
+    .order-summary { background: var(--custard-light); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; border: 2px dashed var(--custard-dark); }
+    .order-summary h3 { font-family: 'Lilita One', cursive; font-size: 1.3rem; color: var(--brown); margin-bottom: 1rem; }
+    .summary-line { display: flex; justify-content: space-between; font-weight: 700; color: var(--brown); padding: 0.3rem 0; font-size: 1rem; }
+    .summary-total { border-top: 2px solid var(--custard-dark); margin-top: 0.5rem; padding-top: 0.7rem; font-size: 1.2rem; }
+    .summary-empty { color: var(--brown-mid); font-style: italic; text-align: center; padding: 0.5rem 0; }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-weight: 800; color: var(--brown); margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .form-group input { width: 100%; padding: 0.8rem 1.2rem; border: 2.5px solid #e8d5c0; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+    .form-group input:focus { border-color: var(--brown-mid); box-shadow: 0 0 0 3px rgba(160,82,45,0.15); }
+
+    /* ── LOCATION ── */
+    .location-row { display: flex; gap: 0.6rem; align-items: stretch; }
+    .location-row input { flex: 1; }
+    .gps-btn { background: var(--custard); color: var(--brown); border: 2.5px solid var(--custard-dark); border-radius: 12px; padding: 0 1.1rem; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 900; cursor: pointer; white-space: nowrap; transition: background 0.15s, transform 0.1s, color 0.15s; display: flex; align-items: center; gap: 0.3rem; }
+    .gps-btn:hover { background: var(--custard-dark); color: white; }
+    .gps-btn:active { transform: scale(0.97); }
+    .gps-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .gps-status { font-size: 0.8rem; margin-top: 0.4rem; min-height: 1.2rem; font-weight: 700; padding-left: 0.2rem; }
+    .gps-status.success { color: var(--pop-green); }
+    .gps-status.error   { color: var(--pop-red); }
+    .gps-status.loading { color: var(--brown-mid); }
+    .map-preview { margin-top: 0.8rem; border-radius: 12px; overflow: hidden; border: 2px solid #e8d5c0; display: none; }
+    .map-preview iframe { width: 100%; height: 180px; border: none; display: block; }
+
+    .submit-btn { width: 100%; padding: 1rem; background: var(--brown); color: white; border: none; border-radius: 14px; font-family: 'Lilita One', cursive; font-size: 1.4rem; letter-spacing: 1px; cursor: pointer; box-shadow: 0 6px 0 #3D1A05; transition: transform 0.15s, box-shadow 0.15s; }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #3D1A05; }
+    .submit-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #3D1A05; }
+    .submit-btn:disabled { background: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-allowed; }
+
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--pop-green); color: white; padding: 1rem 1.5rem; border-radius: 16px; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; z-index: 999; max-width: 320px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--pop-red); }
+
+    .orders-section { max-width: 900px; margin: 0 auto 4rem; padding: 0 1.5rem; }
+    .order-card { background: white; border-radius: 16px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(92,45,10,0.08); border-left: 5px solid var(--brown-mid); display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+    .order-card-id    { font-family: 'Lilita One', cursive; font-size: 1.1rem; color: var(--brown); }
+    .order-card-name  { font-weight: 700; color: var(--brown-mid); font-size: 0.9rem; }
+    .order-card-items { font-size: 0.9rem; color: #666; margin-top: 0.3rem; }
+    .order-card-loc   { font-size: 0.82rem; color: var(--brown-mid); margin-top: 0.25rem; font-style: italic; }
+    .order-card-total { font-family: 'Lilita One', cursive; font-size: 1.3rem; color: var(--custard-dark); white-space: nowrap; }
+    .no-orders { text-align: center; color: var(--brown-mid); font-size: 1rem; font-style: italic; padding: 1.5rem; }
+
+    footer { background: var(--brown); color: rgba(255,255,255,0.6); text-align: center; padding: 1.5rem; font-size: 0.85rem; font-weight: 600; }
+    footer strong { color: var(--custard); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Gracy <span>Foodie </span>Production</div>
+  <button class="cart-btn" onclick="scrollToOrder()">
+    🛒 My Order <span id="cart-count">0</span>
+  </button>
+</header>
+
+<section class="hero">
+  <div class="hero-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  <div class="hero-content">
+    <h1>Comfort In Every <span>Taste 😋</span></h1>
+    <p>Pick your favourites, place your order, and get ready for a flavour explosion.</p>
+    <span class="hero-badge">✨ Order Fresh · Eat Happy</span>
+  </div>
+</section>
+
+<svg class="wave" viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="background:var(--brown)">
+  <path d="M0,60 C360,0 1080,0 1440,60 L1440,60 L0,60 Z" fill="#FFF8EE"/>
+</svg>
+
+<section class="menu-section">
+  <h2 class="section-title">Choose Your Treat</h2>
+  <div class="menu-grid" id="menu-grid"></div>
+</section>
+
+<section class="order-section" id="order-section">
+  <h2 class="section-title" style="text-align:left;margin-bottom:1.5rem">Your Order</h2>
+
+  <div class="order-summary">
+    <h3>📋 Order Summary</h3>
+    <div id="summary-lines"><p class="summary-empty">Nothing added yet — pick a treat above!</p></div>
+  </div>
+
+  <div class="form-group">
+    <label for="customer-name">Your Name</label>
+    <input type="text" id="customer-name" placeholder="e.g. Daniel Akpa" maxlength="60"/>
+  </div>
+
+  <!-- ── LOCATION FIELD ── -->
+  <div class="form-group">
+    <label for="customer-address">Delivery Address <span style="color:var(--pop-red)">*</span></label>
+    <div class="location-row">
+      <input type="text" id="customer-address" placeholder="e.g. Ademola Adetokunbo Crescent in Wuse 2, Abuja"/>
+      <button class="gps-btn" id="gps-btn" onclick="detectLocation()">📍 Use GPS</button>
+    </div>
+    <div class="gps-status" id="gps-status"></div>
+    <div class="map-preview" id="map-preview">
+      <iframe id="map-frame" src="" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <input type="hidden" id="customer-lat"/>
+  <input type="hidden" id="customer-lng"/>
+
+  <button class="submit-btn" id="submit-btn" onclick="placeOrder()">🎉 Place My Order!</button>
+</section>
+
+<section class="orders-section">
+  <h2 class="section-title">Recent Orders</h2>
+  <div id="orders-list"></div>
+</section>
+
+<footer>
+  Made with 🍮 by <strong>Gracy Foodie Production</strong> — Comfort Powered &amp; Savor the Sweetness
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';
+  const quantities = {};
+  let menuItems = [];
+
+  async function loadMenu() {
+    try {
+      const res = await fetch(API + '/api/menu');
+      menuItems = await res.json();
+      renderMenu();
+    } catch {
+      document.getElementById('menu-grid').innerHTML =
+        '<p style="color:red;text-align:center">Could not load menu. Is the Go server running?</p>';
+    }
+  }
+
+  function renderMenu() {
+    const grid = document.getElementById('menu-grid');
+    grid.innerHTML = menuItems.map((item, i) => {
+      quantities[item.id] = 0;
+      const theme = i === 0 ? 'brown-theme' : 'custard-theme';
+      return `
+        <div class="menu-card">
+          <div class="card-top ${theme}">
+            <span class="card-badge">${item.badge}</span>
+            <span class="food-emoji" style="animation-delay:${i * 1.5}s">${item.emoji}</span>
+            <div class="food-name">${item.name}</div>
+          </div>
+          <div class="card-body">
+            <p class="food-desc">${item.description}</p>
+            <div class="card-footer">
+              <div class="food-price"><span>$</span>${item.price.toFixed(2)}</div>
+              <div class="qty-control">
+                <button class="qty-btn minus" onclick="changeQty('${item.id}', -1)">−</button>
+                <span class="qty-display" id="qty-${item.id}">0</span>
+                <button class="qty-btn plus" onclick="changeQty('${item.id}', 1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function changeQty(id, delta) {
+    quantities[id] = Math.max(0, (quantities[id] || 0) + delta);
+    document.getElementById('qty-' + id).textContent = quantities[id];
+    updateSummary();
+    updateCartCount();
+  }
+
+  function updateCartCount() {
+    const total = Object.values(quantities).reduce((a, b) => a + b, 0);
+    document.getElementById('cart-count').textContent = total;
+  }
+
+  function updateSummary() {
+    const lines = document.getElementById('summary-lines');
+    const items = menuItems.filter(i => quantities[i.id] > 0);
+    if (!items.length) {
+      lines.innerHTML = '<p class="summary-empty">Nothing added yet — pick a treat above!</p>';
+      return;
+    }
+    let total = 0, html = '';
+    items.forEach(item => {
+      const qty = quantities[item.id];
+      const sub = qty * item.price;
+      total += sub;
+      html += `<div class="summary-line"><span>${item.emoji} ${item.name} × ${qty}</span><span>$${sub.toFixed(2)}</span></div>`;
+    });
+    html += `<div class="summary-line summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+    lines.innerHTML = html;
+  }
+
+  /* ── GPS LOCATION ── */
+  function setGpsStatus(msg, type) {
+    const el = document.getElementById('gps-status');
+    el.textContent = msg;
+    el.className = 'gps-status ' + (type || '');
+  }
+
+  function showMapPreview(lat, lng) {
+    const preview = document.getElementById('map-preview');
+    const frame   = document.getElementById('map-frame');
+    frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}`;
+    preview.style.display = 'block';
+  }
+
+  function detectLocation() {
+    const btn = document.getElementById('gps-btn');
+    if (!navigator.geolocation) {
+      setGpsStatus('Geolocation not supported by your browser.', 'error');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Locating…';
+    setGpsStatus('Requesting your location…', 'loading');
+
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords: { latitude: lat, longitude: lng } }) => {
+        document.getElementById('customer-lat').value = lat;
+        document.getElementById('customer-lng').value = lng;
+        showMapPreview(lat, lng);
+        try {
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const d = await r.json();
+          document.getElementById('customer-address').value = d.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setGpsStatus('Location detected and filled in!', 'success');
+        } catch {
+          document.getElementById('customer-address').value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setGpsStatus('Coordinates captured (address lookup unavailable).', 'success');
+        }
+        btn.disabled = false;
+        btn.textContent = '📍 Use GPS';
+      },
+      err => {
+        const msgs = { 1: 'Permission denied. Please allow location access.', 2: 'Position unavailable. Try again.', 3: 'Request timed out. Try again.' };
+        setGpsStatus(msgs[err.code] || err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '📍 Use GPS';
+      },
+      { timeout: 12000, enableHighAccuracy: true }
+    );
+  }
+
+  /* ── PLACE ORDER ── */
+  async function placeOrder() {
+    const name    = document.getElementById('customer-name').value.trim();
+    const address = document.getElementById('customer-address').value.trim();
+    const lat     = parseFloat(document.getElementById('customer-lat').value) || 0;
+    const lng     = parseFloat(document.getElementById('customer-lng').value) || 0;
+
+    if (!name)    { showToast('Please enter your name!', true); return; }
+    if (!address) { showToast('Please enter your delivery address!', true); return; }
+
+    const items = menuItems
+      .filter(i => quantities[i.id] > 0)
+      .map(i => ({ name: i.name, quantity: quantities[i.id], price: i.price }));
+
+    if (!items.length) { showToast('Add at least one item first!', true); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Placing order…';
+
+    try {
+      const res = await fetch(API + '/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, items, location: { address, latitude: lat, longitude: lng } })
+      });
+      if (!res.ok) throw new Error();
+      const order = await res.json();
+      showToast(`Order ${order.id} placed! Thanks, ${name}!`);
+      menuItems.forEach(i => { quantities[i.id] = 0; document.getElementById('qty-' + i.id).textContent = '0'; });
+      document.getElementById('customer-name').value    = '';
+      document.getElementById('customer-address').value = '';
+      document.getElementById('customer-lat').value     = '';
+      document.getElementById('customer-lng').value     = '';
+      document.getElementById('map-preview').style.display = 'none';
+      setGpsStatus('', '');
+      updateSummary();
+      updateCartCount();
+      loadOrders();
+    } catch {
+      showToast('Something went wrong. Try again!', true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🎉 Place My Order!';
+    }
+  }
+
+  /* ── ORDERS LIST ── */
+  async function loadOrders() {
+    try {
+      const res    = await fetch(API + '/api/orders');
+      const orders = await res.json();
+      const list   = document.getElementById('orders-list');
+      if (!orders || !orders.length) {
+        list.innerHTML = '<p class="no-orders">No orders yet — be the first!</p>';
+        return;
+      }
+      list.innerHTML = [...orders].reverse().map(o => `
+        <div class="order-card">
+          <div>
+            <div class="order-card-id">${o.id}</div>
+            <div class="order-card-name">👤 ${o.name}</div>
+            <div class="order-card-items">${o.items.map(i => `${i.name} × ${i.quantity}`).join(' &amp; ')}</div>
+            <div class="order-card-loc">📍 ${o.location && o.location.address ? o.location.address : 'No address provided'}</div>
+          </div>
+          <div class="order-card-total">$${o.total.toFixed(2)}</div>
+        </div>`).join('');
+    } catch { /* server offline */ }
+  }
+
+  function showToast(msg, error = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast' + (error ? ' error' : '');
+    void t.offsetWidth;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function scrollToOrder() {
+    document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  loadMenu();
+  loadOrders();
+  setInterval(loadOrders, 10000);
+</script>
+</body>
+</html>
