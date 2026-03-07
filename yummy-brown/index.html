@@ -125,6 +125,82 @@
 
     footer { background: var(--brown); color: rgba(255,255,255,0.6); text-align: center; padding: 1.5rem; font-size: 0.85rem; font-weight: 600; }
     footer strong { color: var(--custard); }
+
+    .size-picker {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+.size-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2.5px solid var(--brown-light);
+  border-radius: 10px;
+  background: white;
+  color: var(--brown);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.size-btn:hover { background: var(--custard-light); }
+.size-btn.active {
+  background: var(--brown);
+  color: white;
+  border-color: var(--brown);
+  box-shadow: 0 3px 0 #3D1A05;
+}
+
+    .flavour-picker {
+  margin-bottom: 1.2rem;
+  padding: 0.8rem 1rem;
+  background: var(--custard-light);
+  border-radius: 12px;
+  border: 2px dashed var(--custard-dark);
+}
+.flavour-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--brown);
+  margin-bottom: 0.6rem;
+}
+.flavour-options {
+  display: flex;
+  gap: 0.6rem;
+}
+.flavour-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2.5px solid var(--custard-dark);
+  border-radius: 10px;
+  background: white;
+  color: var(--brown);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.flavour-btn:hover { background: var(--custard-light); }
+.flavour-btn.active {
+  background: var(--custard-dark);
+  color: white;
+  border-color: var(--custard-dark);
+  box-shadow: 0 3px 0 #8B6500;
+}
+.flavour-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.flavour-name {
+  font-weight: 800;
+  color: var(--brown);
+  font-size: 0.95rem;
+}
   </style>
 </head>
 <body>
@@ -199,6 +275,13 @@
   Made with 🍮 by <strong>Gracy Foodie Production</strong> — Comfort Powered &amp; Savor the Sweetness
 </footer>
 
+
+<div style="background: #3D1A05; padding: 0.8rem; text-align: center;">
+  <a href="tel:+2348012345678" style="color: #ece8dc; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; text-decoration: none; letter-spacing: 1px;">
+    📞 Call us: +234 8102966386 +234 8083574564
+  </a>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -216,45 +299,145 @@
         '<p style="color:red;text-align:center">Could not load menu. Is the Go server running?</p>';
     }
   }
-
+  
   function renderMenu() {
-    const grid = document.getElementById('menu-grid');
-    grid.innerHTML = menuItems.map((item, i) => {
-      quantities[item.id] = 0;
-      const theme = i === 0 ? 'brown-theme' : 'custard-theme';
-      return `
-        <div class="menu-card">
-          <div class="card-top ${theme}">
-            <span class="card-badge">${item.badge}</span>
-            <span class="food-emoji" style="animation-delay:${i * 1.5}s">${item.emoji}</span>
-            <div class="food-name">${item.name}</div>
+  const grid = document.getElementById('menu-grid');
+  grid.innerHTML = menuItems.map((item, i) => {
+    quantities[item.id] = 0;
+    const theme = i === 0 ? 'brown-theme' : 'custard-theme';
+
+    const flavourPicker = item.id === 'creamy-custard' ? `
+      <div class="flavour-picker">
+        <p class="flavour-label">Choose your flavour(s):</p>
+        <div class="flavour-row">
+          <span class="flavour-name">🍦 Vanilla</span>
+          <div class="qty-control">
+            <button class="qty-btn minus" onclick="changeFlavourQty('vanilla', -1)">−</button>
+            <span class="qty-display" id="qty-vanilla">0</span>
+            <button class="qty-btn plus" onclick="changeFlavourQty('vanilla', 1)">+</button>
           </div>
-          <div class="card-body">
-            <p class="food-desc">${item.description}</p>
-            <div class="card-footer">
-              <div class="food-price"><span>$</span>${item.price.toFixed(2)}</div>
-              <div class="qty-control">
-                <button class="qty-btn minus" onclick="changeQty('${item.id}', -1)">−</button>
-                <span class="qty-display" id="qty-${item.id}">0</span>
-                <button class="qty-btn plus" onclick="changeQty('${item.id}', 1)">+</button>
-              </div>
+        </div>
+        <div class="flavour-row">
+          <span class="flavour-name">🍌 Banana</span>
+          <div class="qty-control">
+            <button class="qty-btn minus" onclick="changeFlavourQty('banana', -1)">−</button>
+            <span class="qty-display" id="qty-banana">0</span>
+            <button class="qty-btn plus" onclick="changeFlavourQty('banana', 1)">+</button>
+          </div>
+        </div>
+      </div>` : '';
+
+    return `
+      <div class="menu-card" id="card-${item.id}">
+        <div class="card-top ${theme}">
+          <span class="card-badge">${item.badge}</span>
+          <span class="selected-tick">✔ Selected</span>
+          <span class="food-emoji" style="animation-delay:${i * 1.5}s">${item.emoji}</span>
+          <div class="food-name">${item.name}</div>
+        </div>
+        <div class="card-body">
+          <p class="food-desc">${item.description}</p>
+
+          <div class="size-picker">
+            <button class="size-btn active" onclick="selectSize('${item.id}', 'small', this)">
+              🥡 Small<br><strong>₦${item.priceSmall.toLocaleString()}</strong>
+            </button>
+            <button class="size-btn" onclick="selectSize('${item.id}', 'big', this)">
+              🍱 Big<br><strong>₦${item.priceBig.toLocaleString()}</strong>
+            </button>
+          </div>
+
+          ${flavourPicker}
+
+          <div class="card-footer">
+            <div class="food-price" id="price-display-${item.id}">
+              <span>₦</span>${item.priceSmall.toLocaleString()}
+            </div>
+            <div class="qty-control">
+              <button class="qty-btn minus" onclick="changeQty('${item.id}', -1)">−</button>
+              <span class="qty-display" id="qty-${item.id}">0</span>
+              <button class="qty-btn plus" onclick="changeQty('${item.id}', 1)">+</button>
             </div>
           </div>
-        </div>`;
-    }).join('');
+        </div>
+      </div>`;
+  }).join('');
+}
+
+const selectedSizes = {};
+const selectedPrices = {};
+
+function selectSize(id, size, btn) {
+  // deactivate other size buttons for this card
+  btn.closest('.size-picker').querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  selectedSizes[id] = size;
+
+  // update price based on size
+  const item = menuItems.find(i => i.id === id);
+  const price = size === 'small' ? item.priceSmall : item.priceBig;
+  selectedPrices[id] = price;
+
+  // update price display
+  document.getElementById('price-display-' + id).innerHTML = `<span>₦</span>${price.toLocaleString()}`;
+
+  updateSummary();
+}
+
+function toggleFlavour(btn, flavour) {
+  btn.classList.toggle('active');
+
+  // collect all active flavours
+  const active = [...btn.closest('.flavour-options').querySelectorAll('.flavour-btn.active')]
+    .map(b => {
+      const text = b.textContent.trim();
+      return text.includes('Vanilla') ? 'Vanilla' : 'Banana';
+    });
+
+  document.getElementById('custard-flavour').value = active.join(' & ');
+}
+
+  const flavourQty = { vanilla: 0, banana: 0 };
+
+function changeFlavourQty(flavour, delta) {
+  flavourQty[flavour] = Math.max(0, (flavourQty[flavour] || 0) + delta);
+  document.getElementById('qty-' + flavour).textContent = flavourQty[flavour];
+
+  // auto update the total custard quantity to match combined flavours
+  const total = flavourQty.vanilla + flavourQty.banana;
+  quantities['creamy-custard'] = total;
+  document.getElementById('qty-creamy-custard').textContent = total;
+  updateSummary();
+  updateCartCount();
+}
+
+function changeQty(id, delta) {
+  quantities[id] = Math.max(0, (quantities[id] || 0) + delta);
+  document.getElementById('qty-' + id).textContent = quantities[id];
+
+  const card = document.getElementById('card-' + id);
+  if (quantities[id] > 0) {
+    card.classList.add('selected');
+  } else {
+    card.classList.remove('selected');
   }
 
-  function changeQty(id, delta) {
-    quantities[id] = Math.max(0, (quantities[id] || 0) + delta);
-    document.getElementById('qty-' + id).textContent = quantities[id];
-    updateSummary();
-    updateCartCount();
+  // set default size price if not selected yet
+  if (!selectedPrices[id]) {
+    const item = menuItems.find(i => i.id === id);
+    selectedPrices[id] = item.priceSmall;
+    selectedSizes[id] = 'small';
   }
+
+  updateSummary();
+  updateCartCount();
+}
 
   function updateCartCount() {
     const total = Object.values(quantities).reduce((a, b) => a + b, 0);
     document.getElementById('cart-count').textContent = total;
-  }
+  }  
 
   function updateSummary() {
     const lines = document.getElementById('summary-lines');
@@ -266,11 +449,13 @@
     let total = 0, html = '';
     items.forEach(item => {
       const qty = quantities[item.id];
-      const sub = qty * item.price;
+      const price = selectedPrices[item.id] || item.priceSmall;
+      const size = selectedSizes[item.id] || 'small';
+      const sub = qty * price;
       total += sub;
-      html += `<div class="summary-line"><span>${item.emoji} ${item.name} × ${qty}</span><span>$${sub.toFixed(2)}</span></div>`;
+      html += `<div class="summary-line"><span>${item.emoji} ${item.name} (${size}) × ${qty}</span><span>₦${sub.toLocaleString()}</span></div>`;
     });
-    html += `<div class="summary-line summary-total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+    html += `<div class="summary-line summary-total"><span>Total</span><span>₦${total.toLocaleString()}</span></div>`;
     lines.innerHTML = html;
   }
 
@@ -335,13 +520,24 @@
     const lat     = parseFloat(document.getElementById('customer-lat').value) || 0;
     const lng     = parseFloat(document.getElementById('customer-lng').value) || 0;
 
+    
     if (!name)    { showToast('Please enter your name!', true); return; }
     if (!address) { showToast('Please enter your delivery address!', true); return; }
+    
+   const flavourParts = [];
+  if (flavourQty.vanilla > 0) flavourParts.push(`Vanilla ×${flavourQty.vanilla}`);
+  if (flavourQty.banana > 0) flavourParts.push(`Banana ×${flavourQty.banana}`);
+   const selectedFlavour = flavourParts.length > 0 ? flavourParts.join(', ') : 'No flavour selected';
 
     const items = menuItems
-      .filter(i => quantities[i.id] > 0)
-      .map(i => ({ name: i.name, quantity: quantities[i.id], price: i.price }));
-
+    .filter(i => quantities[i.id] > 0)
+    .map(i => ({
+      name: i.id === 'creamy-custard'
+        ? `${i.name} (${selectedSizes[i.id] || 'small'}) (${selectedFlavour})`
+        : `${i.name} (${selectedSizes[i.id] || 'small'})`,
+      quantity: quantities[i.id],
+      price: selectedPrices[i.id] || i.priceSmall
+    }));
     if (!items.length) { showToast('Add at least one item first!', true); return; }
 
     const btn = document.getElementById('submit-btn');
@@ -357,6 +553,14 @@
       if (!res.ok) throw new Error();
       const order = await res.json();
       showToast(`Order ${order.id} placed! Thanks, ${name}!`);
+
+      // send WhatsApp notification
+      const itemText = items.map(i => `${i.name} x${i.quantity}`).join(', ');
+      const msg = `🍮 New Order ${order.id}%0ACustomer: ${name}%0AItems: ${itemText}%0ATotal: %E2%82%A6${order.total.toLocaleString()}%0AAddress: ${address}`;      
+      const waRes = await fetch('/api/whatsapp');
+      const waData = await waRes.json();
+      window.open(`https://wa.me/${waData.phone}?text=${msg}`, '_blank');
+
       menuItems.forEach(i => { quantities[i.id] = 0; document.getElementById('qty-' + i.id).textContent = '0'; });
       document.getElementById('customer-name').value    = '';
       document.getElementById('customer-address').value = '';
@@ -364,12 +568,44 @@
       document.getElementById('customer-lng').value     = '';
       document.getElementById('map-preview').style.display = 'none';
       setGpsStatus('', '');
+
+      // reset flavour quantities
+      flavourQty.vanilla = 0;
+      flavourQty.banana = 0;
+      const vanillaEl = document.getElementById('qty-vanilla');
+      const bananaEl = document.getElementById('qty-banana');
+      if (vanillaEl) vanillaEl.textContent = '0';
+      if (bananaEl) bananaEl.textContent = '0';
+   
+      const custardFlavourEl = document.getElementById('custard-flavour');
+      if (custardFlavourEl) custardFlavourEl.value = '';
+      document.querySelectorAll('.flavour-btn').forEach(b => b.classList.remove('active'));
+      const firstFlavourBtn = document.querySelector('.flavour-btn');
+      if (firstFlavourBtn) firstFlavourBtn.classList.add('active');
+
+      // reset sizes back to small
+      Object.keys(selectedSizes).forEach(id => {
+      selectedSizes[id] = 'small';
+      const item = menuItems.find(i => i.id === id);
+      if (item) selectedPrices[id] = item.priceSmall;
+      const priceDisplay = document.getElementById('price-display-' + id);
+      if (priceDisplay) priceDisplay.innerHTML = `<span>₦</span>${item.priceSmall.toLocaleString()}`;
+      const card = document.getElementById('card-' + id);
+      if (card) {
+       card.querySelectorAll('.size-btn').forEach((b, i) => {
+          b.classList.toggle('active', i === 0);
+        });
+      }
+    });
+
       updateSummary();
       updateCartCount();
       loadOrders();
-    } catch {
-      showToast('Something went wrong. Try again!', true);
-    } finally {
+    } catch(err) {
+      console.error('Order error:', err);
+      showToast('Error: ' + err.message, true);
+    }
+     finally {
       btn.disabled = false;
       btn.textContent = '🎉 Place My Order!';
     }
@@ -393,7 +629,7 @@
             <div class="order-card-items">${o.items.map(i => `${i.name} × ${i.quantity}`).join(' &amp; ')}</div>
             <div class="order-card-loc">📍 ${o.location && o.location.address ? o.location.address : 'No address provided'}</div>
           </div>
-          <div class="order-card-total">$${o.total.toFixed(2)}</div>
+        <div class="order-card-total">₦${o.total.toLocaleString()}</div>
         </div>`).join('');
     } catch { /* server offline */ }
   }

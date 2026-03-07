@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ORD-0001",
+    "items": [
+      {
+        "name": "Yummy-Brown (small)",
+        "quantity": 1,
+        "price": 2500
+      },
+      {
+        "name": "Creamy-Custard (small) (Vanilla ×2, Banana ×1)",
+        "quantity": 3,
+        "price": 1500
+      }
+    ],
+    "total": 7000,
+    "name": "sfgsg",
+    "location": {
+      "address": "otukpo, benue state"
+    },
+    "created_at": "2026-03-07T08:41:45.483567694Z"
+  }
+]
