@@ -201,6 +201,21 @@
   color: var(--brown);
   font-size: 0.95rem;
 }
+
+.delete-btn {
+  background: var(--pop-red);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+.delete-btn:hover { background: #c0392b; transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -246,10 +261,14 @@
     <label for="customer-name">Your Name</label>
     <input type="text" id="customer-name" placeholder="e.g. Daniel Akpa" maxlength="60"/>
   </div>
+<div class="form-group">
+    <label for="customer-phone">Phone Number <span style="color:var(--brown-mid)">(optional if email provided)</span></label>
+    <input type="tel" id="customer-phone" placeholder="e.g. 08012345678" maxlength="15"/>
+  </div>
 
   <div class="form-group">
-    <label for="customer-phone">Phone Number <span style="color:var(--pop-red)">*</span></label>
-    <input type="tel" id="customer-phone" placeholder="e.g. 08012345678" maxlength="15"/>
+    <label for="customer-email">Email Address <span style="color:var(--brown-mid)">(optional if phone provided)</span></label>
+    <input type="email" id="customer-email" placeholder="e.g. daniel@gmail.com"/>
   </div>
 
   <!-- ── LOCATION FIELD ── -->
@@ -522,12 +541,13 @@ function changeQty(id, delta) {
   async function placeOrder() {
     const name    = document.getElementById('customer-name').value.trim();
     const phone   = document.getElementById('customer-phone').value.trim();
+    const email   = document.getElementById('customer-email').value.trim();
     const address = document.getElementById('customer-address').value.trim();
     const lat     = parseFloat(document.getElementById('customer-lat').value) || 0;
     const lng     = parseFloat(document.getElementById('customer-lng').value) || 0;
 
     if (!name)    { showToast('Please enter your name!', true); return; }
-    if (!phone)   { showToast('Please enter your phone number!', true); return; }
+    if (!phone && !email)   { showToast('Please enter at least a phone number or email!', true); return; }
     if (!address) { showToast('Please enter your delivery address!', true); return; }
    
 const flavourParts = [];
@@ -554,7 +574,7 @@ const flavourParts = [];
       const res = await fetch(API + '/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, items, location: { address, latitude: lat, longitude: lng } })      });
+      body: JSON.stringify({ name, phone, email, items, location: { address, latitude: lat, longitude: lng } })      });
       if (!res.ok) throw new Error();
       const order = await res.json();
       showToast(`Order ${order.id} placed! Thanks, ${name}!`);
@@ -569,6 +589,7 @@ const flavourParts = [];
       menuItems.forEach(i => { quantities[i.id] = 0; document.getElementById('qty-' + i.id).textContent = '0'; });
       document.getElementById('customer-name').value    = '';
       document.getElementById('customer-phone').value   = '';
+      document.getElementById('customer-email').value   = '';
       document.getElementById('customer-address').value = '';
       document.getElementById('customer-lat').value     = '';
       document.getElementById('customer-lng').value     = '';
@@ -627,13 +648,14 @@ const flavourParts = [];
         list.innerHTML = '<p class="no-orders">No orders yet — be the first!</p>';
         return;
       }
-      list.innerHTML = [...orders].reverse().map(o => `
+   list.innerHTML = [...orders].reverse().map(o => `
         <div class="order-card">
           <div>
             <div class="order-card-id">${o.id}</div>
             <div class="order-card-name">👤 ${o.name}</div>
             <div class="order-card-items">${o.items.map(i => `${i.name} × ${i.quantity}`).join(' &amp; ')}</div>
             <div class="order-card-loc">📍 ${o.location && o.location.address ? o.location.address : 'No address provided'}</div>
+            <button class="delete-btn" onclick="deleteOrder('${o.id}')">🗑 Mark Delivered</button>
           </div>
         <div class="order-card-total">₦${o.total.toLocaleString()}</div>
         </div>`).join('');
@@ -653,6 +675,21 @@ const flavourParts = [];
     document.getElementById('order-section').scrollIntoView({ behavior: 'smooth' });
   }
 
+  async function deleteOrder(id) {
+    if (!confirm('Mark this order as delivered and remove it?')) return;
+    try {
+      await fetch('/api/orders/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      loadOrders();
+    } catch {
+      showToast('Could not remove order. Try again!', true);
+    }
+  }
+
+  
   loadMenu();
   loadOrders();
   setInterval(loadOrders, 10000);

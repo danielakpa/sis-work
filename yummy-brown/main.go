@@ -41,6 +41,7 @@ type Order struct {
 	Total     float64     `json:"total"`
 	Name      string      `json:"name"`
 	Phone     string      `json:"phone"`
+	Email     string      `json:"email"`
 	Location  Location    `json:"location"`
 	CreatedAt time.Time   `json:"created_at"`
 }
@@ -48,6 +49,7 @@ type Order struct {
 type OrderRequest struct {
 	Name     string      `json:"name"`
 	Phone    string      `json:"phone"`
+	Email    string      `json:"email"`
 	Items    []OrderItem `json:"items"`
 	Location Location    `json:"location"`
 }
@@ -125,6 +127,7 @@ func sendEmailNotification(order Order) {
 				"Order ID : %s\r\n"+
 				"Customer : %s\r\n"+
 				"Phone   : %s\r\n"+
+				"Email  : %s\r\n"+
 				"Address  : %s\r\n"+
 				"Time     : %s\r\n\r\n"+
 				"Items:\r\n%s\r\n\r\n"+
@@ -133,6 +136,7 @@ func sendEmailNotification(order Order) {
 			order.ID,
 			order.Name,
 			order.Phone,
+			order.Email,
 			order.Location.Address,
 			order.CreatedAt.Format("2006-01-02 15:04:05"),
 			strings.Join(itemLines, "\r\n"),
@@ -218,6 +222,7 @@ func orderHandler(w http.ResponseWriter, r *http.Request) {
 			Total:     total,
 			Name:      req.Name,
 			Phone:     req.Phone,
+			Email:     req.Email,
 			Location:  req.Location,
 			CreatedAt: time.Now(),
 		}
@@ -250,6 +255,41 @@ func frontendHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
 
+func deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ID string `json:"id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	ordersMu.Lock()
+	newOrders := []Order{}
+	for _, o := range orders {
+		if o.ID != req.ID {
+			newOrders = append(newOrders, o)
+		}
+	}
+	orders = newOrders
+	ordersMu.Unlock()
+
+	go saveOrdersToFile()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+}
+
 func main() {
 	// Load saved orders on startup
 	loadOrdersFromFile()
@@ -257,6 +297,7 @@ func main() {
 	http.HandleFunc("/", frontendHandler)
 	http.HandleFunc("/api/menu", menuHandler)
 	http.HandleFunc("/api/orders", orderHandler)
+	http.HandleFunc("/api/orders/delete", deleteOrderHandler)
 	http.HandleFunc("/api/whatsapp", whatsappHandler)
 
 	fmt.Println("🍮 Gracy Foodie Production server running at http://localhost:8080")
