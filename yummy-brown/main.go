@@ -40,12 +40,14 @@ type Order struct {
 	Items     []OrderItem `json:"items"`
 	Total     float64     `json:"total"`
 	Name      string      `json:"name"`
+	Phone     string      `json:"phone"`
 	Location  Location    `json:"location"`
 	CreatedAt time.Time   `json:"created_at"`
 }
 
 type OrderRequest struct {
 	Name     string      `json:"name"`
+	Phone    string      `json:"phone"`
 	Items    []OrderItem `json:"items"`
 	Location Location    `json:"location"`
 }
@@ -122,6 +124,7 @@ func sendEmailNotification(order Order) {
 				"New order received!\r\n\r\n"+
 				"Order ID : %s\r\n"+
 				"Customer : %s\r\n"+
+				"Phone   : %s\r\n"+
 				"Address  : %s\r\n"+
 				"Time     : %s\r\n\r\n"+
 				"Items:\r\n%s\r\n\r\n"+
@@ -129,6 +132,7 @@ func sendEmailNotification(order Order) {
 			order.ID, order.Name,
 			order.ID,
 			order.Name,
+			order.Phone,
 			order.Location.Address,
 			order.CreatedAt.Format("2006-01-02 15:04:05"),
 			strings.Join(itemLines, "\r\n"),
@@ -213,6 +217,7 @@ func orderHandler(w http.ResponseWriter, r *http.Request) {
 			Items:     req.Items,
 			Total:     total,
 			Name:      req.Name,
+			Phone:     req.Phone,
 			Location:  req.Location,
 			CreatedAt: time.Now(),
 		}

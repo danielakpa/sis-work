@@ -242,9 +242,14 @@
     <div id="summary-lines"><p class="summary-empty">Nothing added yet — pick a treat above!</p></div>
   </div>
 
-  <div class="form-group">
+<div class="form-group">
     <label for="customer-name">Your Name</label>
     <input type="text" id="customer-name" placeholder="e.g. Daniel Akpa" maxlength="60"/>
+  </div>
+
+  <div class="form-group">
+    <label for="customer-phone">Phone Number <span style="color:var(--pop-red)">*</span></label>
+    <input type="tel" id="customer-phone" placeholder="e.g. 08012345678" maxlength="15"/>
   </div>
 
   <!-- ── LOCATION FIELD ── -->
@@ -516,15 +521,16 @@ function changeQty(id, delta) {
   /* ── PLACE ORDER ── */
   async function placeOrder() {
     const name    = document.getElementById('customer-name').value.trim();
+    const phone   = document.getElementById('customer-phone').value.trim();
     const address = document.getElementById('customer-address').value.trim();
     const lat     = parseFloat(document.getElementById('customer-lat').value) || 0;
     const lng     = parseFloat(document.getElementById('customer-lng').value) || 0;
 
-    
     if (!name)    { showToast('Please enter your name!', true); return; }
+    if (!phone)   { showToast('Please enter your phone number!', true); return; }
     if (!address) { showToast('Please enter your delivery address!', true); return; }
-    
-   const flavourParts = [];
+   
+const flavourParts = [];
   if (flavourQty.vanilla > 0) flavourParts.push(`Vanilla ×${flavourQty.vanilla}`);
   if (flavourQty.banana > 0) flavourParts.push(`Banana ×${flavourQty.banana}`);
    const selectedFlavour = flavourParts.length > 0 ? flavourParts.join(', ') : 'No flavour selected';
@@ -548,8 +554,7 @@ function changeQty(id, delta) {
       const res = await fetch(API + '/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, items, location: { address, latitude: lat, longitude: lng } })
-      });
+      body: JSON.stringify({ name, phone, items, location: { address, latitude: lat, longitude: lng } })      });
       if (!res.ok) throw new Error();
       const order = await res.json();
       showToast(`Order ${order.id} placed! Thanks, ${name}!`);
@@ -563,6 +568,7 @@ function changeQty(id, delta) {
 
       menuItems.forEach(i => { quantities[i.id] = 0; document.getElementById('qty-' + i.id).textContent = '0'; });
       document.getElementById('customer-name').value    = '';
+      document.getElementById('customer-phone').value   = '';
       document.getElementById('customer-address').value = '';
       document.getElementById('customer-lat').value     = '';
       document.getElementById('customer-lng').value     = '';
