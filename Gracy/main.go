@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/smtp"
@@ -14,14 +15,43 @@ import (
 
 // ── CONFIG — change these values ──────────────────────────────
 const (
-	myEmail       = "graceakpa083@gmail.com" // your Gmail address
-	myEmailPass   = "ojvs zkpd klba xynu"    // Gmail App Password (not your login password)
-	notifyEmail   = "graceakpa083@gmail.com" // email to receive order notifications
-	whatsappPhone = "2348102966386"          // your WhatsApp number (no + or spaces)
-	ordersFile    = "orders.json"            // file to save orders
+	myEmail       = "graceakpa083@gmail.com"
+	myEmailPass   = "ojvs zkpd klba xynu"
+	notifyEmail   = "graceakpa083@gmail.com"
+	whatsappPhone = "2348102966386"
+	ordersFile    = "orders.json"
 )
 
+// ── FLUTTERWAVE KEYS ──────────────────────────────────────────
+// Option 1: Set as environment variables on Render:
+//
+//	FLW_PUBLIC_KEY = FLWPUBK_TEST-xxxxxxxxxxxx
+//	FLW_SECRET_KEY = FLWSECK_TEST-xxxxxxxxxxxx
+//
+// Option 2: Paste directly below (not recommended for production)
+func getFlwPublicKey() string {
+	if k := os.Getenv("FLW_PUBLIC_KEY"); k != "" {
+		return k
+	}
+	return "0ca40d74-4433-495f-a9de-b6ab42816a7a" // ← PASTE PUBLIC KEY HERE
+}
+func getFlwSecretKey() string {
+	if k := os.Getenv("FLW_SECRET_KEY"); k != "" {
+		return k
+	}
+	return "mf3A82VVmu0hbU10Fv9BLEeTlBz90lp3" // ← PASTE SECRET KEY HERE
+}
+
 // ─────────────────────────────────────────────────────────────
+
+type OrderStatus string
+
+const (
+	StatusPending   OrderStatus = "Pending"
+	StatusPaid      OrderStatus = "Paid"
+	StatusPreparing OrderStatus = "Preparing"
+	StatusDelivered OrderStatus = "Delivered"
+)
 
 type OrderItem struct {
 	Name     string  `json:"name"`
@@ -44,6 +74,8 @@ type Order struct {
 	Email     string      `json:"email"`
 	Location  Location    `json:"location"`
 	CreatedAt time.Time   `json:"created_at"`
+	Status    OrderStatus `json:"status"`
+	PaymentID string      `json:"payment_id"`
 }
 
 type OrderRequest struct {
@@ -59,6 +91,7 @@ var (
 	ordersMu sync.Mutex
 	counter  int
 )
+
 var menu = []map[string]interface{}{
 	{
 		"id":          "yummy-brown",
@@ -80,7 +113,6 @@ var menu = []map[string]interface{}{
 	},
 }
 
-// ── SAVE ORDERS TO FILE ───────────────────────────────────────
 func saveOrdersToFile() {
 	ordersMu.Lock()
 	ordersCopy := make([]Order, len(orders))
@@ -95,13 +127,12 @@ func saveOrdersToFile() {
 		log.Println("Error writing orders file:", err)
 		return
 	}
-	log.Println("Orders saved to", ordersFile)
 }
 
 func loadOrdersFromFile() {
 	data, err := os.ReadFile(ordersFile)
 	if err != nil {
-		return // file doesn't exist yet, that's fine
+		return
 	}
 	if err := json.Unmarshal(data, &orders); err != nil {
 		log.Println("Error loading orders file:", err)
@@ -111,54 +142,39 @@ func loadOrdersFromFile() {
 	log.Printf("Loaded %d orders from %s\n", len(orders), ordersFile)
 }
 
-// ── SEND EMAIL ────────────────────────────────────────────────
 func sendEmailNotification(order Order) {
 	go func() {
 		auth := smtp.PlainAuth("", myEmail, myEmailPass, "smtp.gmail.com")
-
 		var itemLines []string
 		for _, item := range order.Items {
 			itemLines = append(itemLines, fmt.Sprintf("  - %s x%d = ₦%.2f", item.Name, item.Quantity, item.Price*float64(item.Quantity)))
 		}
-
 		body := fmt.Sprintf(
 			"Subject: 🍮 New Order %s from %s\r\n\r\n"+
 				"New order received!\r\n\r\n"+
 				"Order ID : %s\r\n"+
 				"Customer : %s\r\n"+
-				"Phone   : %s\r\n"+
-				"Email  : %s\r\n"+
+				"Phone    : %s\r\n"+
+				"Email    : %s\r\n"+
 				"Address  : %s\r\n"+
+				"Status   : %s\r\n"+
 				"Time     : %s\r\n\r\n"+
 				"Items:\r\n%s\r\n\r\n"+
 				"Total: ₦%.2f\r\n",
 			order.ID, order.Name,
-			order.ID,
-			order.Name,
-			order.Phone,
-			order.Email,
-			order.Location.Address,
+			order.ID, order.Name, order.Phone, order.Email,
+			order.Location.Address, string(order.Status),
 			order.CreatedAt.Format("2006-01-02 15:04:05"),
 			strings.Join(itemLines, "\r\n"),
 			order.Total,
 		)
-
-		err := smtp.SendMail(
-			"smtp.gmail.com:587",
-			auth,
-			myEmail,
-			[]string{notifyEmail},
-			[]byte(body),
-		)
+		err := smtp.SendMail("smtp.gmail.com:587", auth, myEmail, []string{notifyEmail}, []byte(body))
 		if err != nil {
 			log.Println("Email error:", err)
-		} else {
-			log.Println("Email notification sent for", order.ID)
 		}
 	}()
 }
 
-// ── HANDLERS ──────────────────────────────────────────────────
 func enableCORS(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -225,14 +241,12 @@ func orderHandler(w http.ResponseWriter, r *http.Request) {
 			Email:     req.Email,
 			Location:  req.Location,
 			CreatedAt: time.Now(),
+			Status:    StatusPending,
 		}
 		orders = append(orders, order)
 		ordersMu.Unlock()
 
-		// 1. Save to file
 		go saveOrdersToFile()
-
-		// 2. Send email
 		sendEmailNotification(order)
 
 		w.Header().Set("Content-Type", "application/json")
@@ -244,15 +258,144 @@ func orderHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
-// whatsappHandler returns the WhatsApp phone number to the frontend
+// ── VERIFY FLUTTERWAVE PAYMENT ────────────────────────────────
+func verifyPaymentHandler(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		TransactionID string `json:"transaction_id"`
+		OrderID       string `json:"order_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	flwURL := fmt.Sprintf("https://api.flutterwave.com/v3/transactions/%s/verify", req.TransactionID)
+	httpReq, _ := http.NewRequest("GET", flwURL, nil)
+	httpReq.Header.Set("Authorization", "Bearer "+getFlwSecretKey())
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		log.Println("Flutterwave verify error:", err)
+		http.Error(w, "Payment verification failed", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	var flwResp map[string]interface{}
+	json.Unmarshal(body, &flwResp)
+
+	data, ok := flwResp["data"].(map[string]interface{})
+	if !ok {
+		http.Error(w, "Invalid Flutterwave response", http.StatusInternalServerError)
+		return
+	}
+
+	status, _ := data["status"].(string)
+	if status != "successful" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"message": "Payment not successful",
+		})
+		return
+	}
+
+	// Update order to Paid + Preparing
+	ordersMu.Lock()
+	for i, o := range orders {
+		if o.ID == req.OrderID {
+			orders[i].Status = StatusPreparing
+			orders[i].PaymentID = req.TransactionID
+			break
+		}
+	}
+	ordersMu.Unlock()
+	go saveOrdersToFile()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "Payment verified! Your order is now being prepared.",
+	})
+}
+
+// ── UPDATE ORDER STATUS (admin use) ──────────────────────────
+func updateStatusHandler(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ID     string      `json:"id"`
+		Status OrderStatus `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	validStatuses := map[OrderStatus]bool{
+		StatusPending: true, StatusPaid: true,
+		StatusPreparing: true, StatusDelivered: true,
+	}
+	if !validStatuses[req.Status] {
+		http.Error(w, "Invalid status", http.StatusBadRequest)
+		return
+	}
+
+	ordersMu.Lock()
+	found := false
+	for i, o := range orders {
+		if o.ID == req.ID {
+			orders[i].Status = req.Status
+			found = true
+			break
+		}
+	}
+	ordersMu.Unlock()
+
+	if !found {
+		http.Error(w, "Order not found", http.StatusNotFound)
+		return
+	}
+
+	go saveOrdersToFile()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
+}
+
+// ── SERVE FLUTTERWAVE PUBLIC KEY TO FRONTEND ──────────────────
+func flwConfigHandler(w http.ResponseWriter, r *http.Request) {
+	enableCORS(w)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"public_key": getFlwPublicKey(),
+	})
+}
+
 func whatsappHandler(w http.ResponseWriter, r *http.Request) {
 	enableCORS(w)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"phone": whatsappPhone})
-}
-
-func frontendHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
 }
 
 func deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
@@ -285,21 +428,31 @@ func deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 	ordersMu.Unlock()
 
 	go saveOrdersToFile()
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 }
 
+func frontendHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
+
 func main() {
-	// Load saved orders on startup
 	loadOrdersFromFile()
 
 	http.HandleFunc("/", frontendHandler)
 	http.HandleFunc("/api/menu", menuHandler)
 	http.HandleFunc("/api/orders", orderHandler)
 	http.HandleFunc("/api/orders/delete", deleteOrderHandler)
+	http.HandleFunc("/api/orders/status", updateStatusHandler)
+	http.HandleFunc("/api/payment/verify", verifyPaymentHandler)
+	http.HandleFunc("/api/flw-config", flwConfigHandler)
 	http.HandleFunc("/api/whatsapp", whatsappHandler)
 
-	fmt.Println("🍮 Gracy Foodie Production server running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Println("🍮 Gracy Foodie Production server running at http://localhost:" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
