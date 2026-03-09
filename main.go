@@ -417,7 +417,7 @@ func deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ordersMu.Lock()http://localhost:8080
+	ordersMu.Lock()
 	newOrders := []Order{}
 	for _, o := range orders {
 		if o.ID != req.ID {
