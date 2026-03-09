@@ -12,6 +12,8 @@
       --custard: #F5C842; --custard-light: #FFF3B0; --custard-dark: #C8960A;
       --cream: #FFF8EE; --ink: #1A0A00; --pop-red: #E83A14;
       --pop-green: #2ECC71; --white: #FFFFFF;
+      /* ADDED: admin colour tokens */
+      --admin-bg:#0F1923; --admin-surface:#1A2636; --admin-border:#2A3A50; --admin-text:#E8EDF2;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
@@ -89,8 +91,6 @@
     .submit-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #3D1A05; }
     .submit-btn:disabled { background: #ccc; box-shadow: 0 6px 0 #aaa; cursor: not-allowed; }
     .pay-note { background: #E8F5E9; border: 2px solid #81C784; border-radius: 12px; padding: 0.9rem 1.2rem; margin-bottom: 1.2rem; font-size: 0.9rem; font-weight: 700; color: #2E7D32; }
-
-    /* ── ORDER TRACKING ── */
     .status-badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.3rem 0.75rem; border-radius: 50px; white-space: nowrap; }
     .status-Pending   { background: #FFF3CD; color: #856404; border: 1.5px solid #FFDF74; }
     .status-Paid      { background: #D4EDDA; color: #155724; border: 1.5px solid #6FCF97; }
@@ -105,24 +105,19 @@
     .track-step.active     { color: var(--custard-dark); }
     .track-line { flex: 1; height: 3px; background: #e0d5c8; min-width: 15px; margin-bottom: 1.2rem; transition: background 0.3s; }
     .track-line.done { background: var(--pop-green); }
-
-    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--pop-green); color: white; padding: 1rem 1.5rem; border-radius: 16px; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; z-index: 999; max-width: 320px; }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--pop-green); color: white; padding: 1rem 1.5rem; border-radius: 16px; font-weight: 800; font-size: 1rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s; z-index: 9999; max-width: 320px; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.error { background: var(--pop-red); }
     .orders-section { max-width: 900px; margin: 0 auto 4rem; padding: 0 1.5rem; }
-    .order-card { background: white; border-radius: 16px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(92,45,10,0.08); border-left: 5px solid var(--brown-mid); }
+    /* CHANGED: buyer order-card has no admin action buttons - removed .order-card-actions, .delete-btn, .status-btn */
+    .order-card { background: white; border-radius: 16px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 4px 15px rgba(92,45,10,0.08); border-left: 5px solid var(--custard); }
     .order-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
     .order-card-id   { font-family: 'Lilita One', cursive; font-size: 1.1rem; color: var(--brown); }
     .order-card-name { font-weight: 700; color: var(--brown-mid); font-size: 0.9rem; }
     .order-card-items { font-size: 0.9rem; color: #666; margin-top: 0.3rem; }
     .order-card-loc  { font-size: 0.82rem; color: var(--brown-mid); margin-top: 0.25rem; font-style: italic; }
     .order-card-total { font-family: 'Lilita One', cursive; font-size: 1.3rem; color: var(--custard-dark); white-space: nowrap; }
-    .order-card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
     .no-orders { text-align: center; color: var(--brown-mid); font-size: 1rem; font-style: italic; padding: 1.5rem; }
-    .delete-btn { background: var(--pop-red); color: white; border: none; border-radius: 8px; padding: 0.4rem 0.8rem; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: background 0.15s; }
-    .delete-btn:hover { background: #c0392b; }
-    .status-btn { background: var(--custard); color: var(--brown); border: none; border-radius: 8px; padding: 0.4rem 0.8rem; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: background 0.15s; }
-    .status-btn:hover { background: var(--custard-dark); color: white; }
     footer { background: var(--brown); color: rgba(255,255,255,0.6); text-align: center; padding: 1.5rem; font-size: 0.85rem; font-weight: 600; }
     footer strong { color: var(--custard); }
     .size-picker { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; }
@@ -133,10 +128,95 @@
     .flavour-label { font-size: 0.85rem; font-weight: 800; color: var(--brown); margin-bottom: 0.6rem; }
     .flavour-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
     .flavour-name { font-weight: 800; color: var(--brown); font-size: 0.95rem; }
+
+    /* ═══════ ADDED: LOGIN OVERLAY ═══════ */
+    #login-overlay { display:none; position:fixed; inset:0; z-index:9998; background:rgba(15,25,35,0.93); backdrop-filter:blur(6px); align-items:center; justify-content:center; }
+    #login-overlay.active { display:flex; }
+    .login-box { background:var(--admin-surface); border:2px solid var(--admin-border); border-radius:20px; padding:2.5rem 2.5rem 2rem; width:100%; max-width:380px; box-shadow:0 30px 80px rgba(0,0,0,0.5); animation:loginPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes loginPop { from{transform:scale(0.85) translateY(30px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+    .login-logo { font-family:'Lilita One',cursive; font-size:1.5rem; color:var(--custard); text-align:center; margin-bottom:0.3rem; }
+    .login-sub { text-align:center; color:#8A9BAD; font-size:0.85rem; font-weight:700; margin-bottom:1.8rem; letter-spacing:0.5px; text-transform:uppercase; }
+    .login-field { margin-bottom:1.2rem; }
+    .login-field label { display:block; color:var(--admin-text); font-weight:800; font-size:0.85rem; margin-bottom:0.4rem; }
+    .login-field input { width:100%; padding:0.75rem 1rem; background:var(--admin-bg); border:2px solid var(--admin-border); border-radius:10px; color:var(--admin-text); font-family:'Nunito',sans-serif; font-size:1rem; font-weight:600; outline:none; transition:border-color 0.2s; }
+    .login-field input:focus { border-color:var(--custard); }
+    .login-btn { width:100%; padding:0.85rem; background:var(--custard); color:var(--brown); border:none; border-radius:12px; font-family:'Lilita One',cursive; font-size:1.2rem; cursor:pointer; transition:background 0.15s,transform 0.1s; margin-top:0.5rem; }
+    .login-btn:hover { background:var(--custard-dark); color:white; transform:translateY(-1px); }
+    .login-err { color:#ff6b6b; font-size:0.85rem; font-weight:700; text-align:center; margin-top:0.6rem; min-height:1.1rem; }
+    .login-cancel { display:block; text-align:center; color:#8A9BAD; font-size:0.82rem; font-weight:700; margin-top:1rem; cursor:pointer; transition:color 0.15s; }
+    .login-cancel:hover { color:var(--custard); }
+
+    /* ═══════ ADDED: ADMIN PANEL ═══════ */
+    #admin-view { display:none; background:var(--admin-bg); min-height:100vh; }
+    .admin-topbar { background:var(--admin-surface); border-bottom:2px solid var(--admin-border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 4px 20px rgba(0,0,0,0.3); gap:1rem; flex-wrap:wrap; }
+    .admin-logo { font-family:'Lilita One',cursive; color:var(--custard); font-size:1.4rem; padding:0.8rem 0; }
+    .admin-logo small { color:#8A9BAD; font-size:0.68rem; font-family:'Nunito',sans-serif; font-weight:800; display:block; text-transform:uppercase; letter-spacing:1px; }
+    .admin-nav { display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .admin-nav-btn { background:transparent; color:#8A9BAD; border:1.5px solid transparent; border-radius:8px; padding:0.5rem 1rem; font-family:'Nunito',sans-serif; font-size:0.85rem; font-weight:800; cursor:pointer; transition:all 0.15s; text-transform:uppercase; letter-spacing:0.5px; }
+    .admin-nav-btn:hover { background:var(--admin-border); color:var(--admin-text); }
+    .admin-nav-btn.active { background:var(--custard); color:var(--brown); border-color:var(--custard); }
+    .admin-logout-btn { background:rgba(232,58,20,0.15); color:#ff6b6b; border:1.5px solid rgba(232,58,20,0.3); border-radius:8px; padding:0.5rem 1rem; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; cursor:pointer; transition:all 0.15s; text-transform:uppercase; }
+    .admin-logout-btn:hover { background:rgba(232,58,20,0.3); }
+    .admin-content { max-width:1100px; margin:0 auto; padding:2rem 1.5rem; }
+    .admin-tab { display:none; }
+    .admin-tab.active { display:block; animation:fadeIn 0.25s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--admin-surface); border:2px solid var(--admin-border); border-radius:16px; padding:1.2rem 1.5rem; position:relative; overflow:hidden; }
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--custard); border-radius:3px 3px 0 0; }
+    .stat-label { color:#8A9BAD; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.4rem; }
+    .stat-value { font-family:'Lilita One',cursive; font-size:2rem; color:var(--custard); }
+    .stat-sub { font-size:0.75rem; color:#8A9BAD; margin-top:0.2rem; }
+    .admin-section-title { font-family:'Lilita One',cursive; font-size:1.6rem; color:var(--custard); margin-bottom:1.2rem; }
+    .admin-order-filters { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+    .filter-btn { background:var(--admin-surface); color:#8A9BAD; border:1.5px solid var(--admin-border); border-radius:8px; padding:0.4rem 1rem; font-family:'Nunito',sans-serif; font-size:0.82rem; font-weight:800; cursor:pointer; transition:all 0.15s; }
+    .filter-btn:hover,.filter-btn.active { background:var(--custard); color:var(--brown); border-color:var(--custard); }
+    .admin-order-card { background:var(--admin-surface); border:2px solid var(--admin-border); border-radius:16px; padding:1.2rem 1.5rem; margin-bottom:0.8rem; border-left:4px solid var(--custard); }
+    .aoc-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:0.6rem; }
+    .aoc-id { font-family:'Lilita One',cursive; color:var(--custard); font-size:1rem; }
+    .aoc-customer { color:var(--admin-text); font-weight:700; font-size:0.9rem; }
+    .aoc-contact { color:#8A9BAD; font-size:0.8rem; }
+    .aoc-items { color:#8A9BAD; font-size:0.82rem; margin-top:0.3rem; }
+    .aoc-address { color:#6B8FAD; font-size:0.8rem; font-style:italic; margin-top:0.2rem; }
+    .aoc-total { font-family:'Lilita One',cursive; font-size:1.3rem; color:var(--custard); }
+    .aoc-actions { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.7rem; align-items:center; }
+    .aoc-advance-btn { background:var(--custard); color:var(--brown); border:none; border-radius:8px; padding:0.4rem 0.9rem; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.82rem; cursor:pointer; transition:background 0.15s; }
+    .aoc-advance-btn:hover { background:var(--custard-dark); color:white; }
+    .aoc-delete-btn { background:rgba(232,58,20,0.15); color:#ff6b6b; border:1.5px solid rgba(232,58,20,0.3); border-radius:8px; padding:0.4rem 0.8rem; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.82rem; cursor:pointer; transition:background 0.15s; }
+    .aoc-delete-btn:hover { background:rgba(232,58,20,0.35); }
+    .no-orders-admin { color:#8A9BAD; text-align:center; font-size:1rem; font-style:italic; padding:3rem; }
+    .settings-card { background:var(--admin-surface); border:2px solid var(--admin-border); border-radius:16px; padding:1.5rem 1.8rem; margin-bottom:1.2rem; max-width:520px; }
+    .settings-card h3 { font-family:'Lilita One',cursive; color:var(--custard); font-size:1.2rem; margin-bottom:1rem; }
+    .settings-field { margin-bottom:1rem; }
+    .settings-field label { display:block; color:#8A9BAD; font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.4rem; }
+    .settings-field input { width:100%; background:var(--admin-bg); color:var(--admin-text); border:1.5px solid var(--admin-border); border-radius:8px; padding:0.6rem 0.9rem; font-family:'Nunito',sans-serif; font-size:0.95rem; font-weight:600; outline:none; transition:border-color 0.2s; }
+    .settings-field input:focus { border-color:var(--custard); }
+    .settings-save-btn { background:var(--custard); color:var(--brown); border:none; border-radius:10px; padding:0.65rem 1.5rem; font-family:'Nunito',sans-serif; font-weight:900; font-size:0.9rem; cursor:pointer; transition:background 0.15s; }
+    .settings-save-btn:hover { background:var(--custard-dark); color:white; }
   </style>
 </head>
 <body>
 
+<!-- ADDED: Login popup — only opens via secret URL, invisible to buyers -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">🍮 Gracy Foodie</div>
+    <div class="login-sub">Admin Access Only</div>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">🔐 Enter Admin Panel</button>
+    <div class="login-err" id="login-err"></div>
+    <span class="login-cancel" onclick="closeLogin()">← Back to ordering</span>
+  </div>
+</div>
+
+<!-- BUYER VIEW — 100% original, zero changes -->
 <header>
   <div class="logo">Gracy <span>Foodie </span>Production</div>
   <button class="cart-btn" onclick="scrollToOrder()">🛒 My Order <span id="cart-count">0</span></button>
@@ -197,6 +277,7 @@
   <button class="submit-btn" id="submit-btn" onclick="placeOrder()">💳 Place & Pay for My Order!</button>
 </section>
 
+<!-- Buyer sees orders + status stepper ONLY — no delete/advance buttons -->
 <section class="orders-section">
   <h2 class="section-title">Recent Orders</h2>
   <div id="orders-list"></div>
@@ -210,6 +291,48 @@
   </a>
 </div>
 
+<!-- ADDED: Admin panel — completely hidden from buyers -->
+<div id="admin-view">
+  <div class="admin-topbar">
+    <div class="admin-logo">🍮 Gracy Foodie <small>Admin Dashboard</small></div>
+    <div class="admin-nav">
+      <button class="admin-nav-btn active" onclick="adminTab('orders',this)">📦 Orders</button>
+      <button class="admin-nav-btn" onclick="adminTab('settings',this)">⚙ Settings</button>
+    </div>
+    <button class="admin-logout-btn" onclick="adminLogout()">🚪 Logout</button>
+  </div>
+  <div class="admin-content">
+    <div class="admin-tab active" id="tab-orders">
+      <div class="stats-row" id="admin-stats"></div>
+      <div class="admin-section-title">📦 All Orders</div>
+      <div class="admin-order-filters">
+        <button class="filter-btn active" onclick="filterOrders('All',this)">All</button>
+        <button class="filter-btn" onclick="filterOrders('Pending',this)">🕐 Pending</button>
+        <button class="filter-btn" onclick="filterOrders('Paid',this)">💳 Paid</button>
+        <button class="filter-btn" onclick="filterOrders('Preparing',this)">👨‍🍳 Preparing</button>
+        <button class="filter-btn" onclick="filterOrders('Delivered',this)">✅ Delivered</button>
+      </div>
+      <div id="admin-orders-list"></div>
+    </div>
+    <div class="admin-tab" id="tab-settings">
+      <div class="admin-section-title">⚙ Settings</div>
+      <div class="settings-card">
+        <h3>🔐 Change Password</h3>
+        <div class="settings-field"><label>Current Password</label><input type="password" id="set-cur-pass" placeholder="Current password"/></div>
+        <div class="settings-field"><label>New Password</label><input type="password" id="set-new-pass" placeholder="Min 6 characters"/></div>
+        <div class="settings-field"><label>Confirm New Password</label><input type="password" id="set-conf-pass" placeholder="Repeat new password"/></div>
+        <button class="settings-save-btn" onclick="changePassword()">💾 Save Password</button>
+      </div>
+      <div class="settings-card">
+        <h3>🔑 Change Username</h3>
+        <div class="settings-field"><label>Current Password (to confirm)</label><input type="password" id="set-user-pass" placeholder="Your password"/></div>
+        <div class="settings-field"><label>New Username</label><input type="text" id="set-new-user" placeholder="New username"/></div>
+        <button class="settings-save-btn" onclick="changeUsername()">💾 Save Username</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -217,6 +340,154 @@
   const quantities = {};
   let menuItems = [];
   let flwPublicKey = '';
+  let allOrders = [];
+  let currentFilter = 'All';
+
+  /* ADDED: localStorage helpers */
+  function lsGet(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d;}catch{return d;}}
+  function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+  /* ADDED: admin credentials — change after first login via Settings tab */
+  let ADMIN_USER = lsGet('gf_admin_user','admin');
+  let ADMIN_PASS = lsGet('gf_admin_pass','gracy2024');
+
+  /* ADDED: secret URL — visit yoursite.com?admin to open login, invisible to buyers */
+  function checkAdminURL(){
+    const p=new URLSearchParams(window.location.search);
+    if(p.has('admin')||window.location.hash==='#admin'){
+      history.replaceState(null,'',window.location.pathname);
+      openLogin();
+    }
+  }
+  function openLogin(){
+    document.getElementById('login-overlay').classList.add('active');
+    setTimeout(()=>document.getElementById('login-user').focus(),100);
+  }
+  function closeLogin(){
+    document.getElementById('login-overlay').classList.remove('active');
+    document.getElementById('login-err').textContent='';
+    document.getElementById('login-pass').value='';
+  }
+  function doLogin(){
+    const u=document.getElementById('login-user').value.trim();
+    const p=document.getElementById('login-pass').value;
+    if(u===ADMIN_USER&&p===ADMIN_PASS){
+      closeLogin();
+      document.getElementById('admin-view').style.display='block';
+      document.body.style.overflow='hidden'; // hide buyer page behind admin
+      loadAdminOrders();
+      showToast('Welcome, '+ADMIN_USER+'! 👋');
+    }else{
+      document.getElementById('login-err').textContent='❌ Incorrect username or password.';
+      document.getElementById('login-pass').value='';
+    }
+  }
+  function adminLogout(){
+    document.getElementById('admin-view').style.display='none';
+    document.body.style.overflow='';
+    showToast('Logged out.');
+  }
+  function adminTab(name,btn){
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  /* ADDED: admin orders */
+  async function loadAdminOrders(){
+    try{const res=await fetch(API+'/api/orders');allOrders=await res.json();}
+    catch{allOrders=[];}
+    renderAdminStats();renderAdminOrders();
+  }
+  function renderAdminStats(){
+    const total=allOrders.length;
+    const revenue=allOrders.filter(o=>['Paid','Preparing','Delivered'].includes(o.status)).reduce((s,o)=>s+(o.total||0),0);
+    const pending=allOrders.filter(o=>o.status==='Pending').length;
+    const delivered=allOrders.filter(o=>o.status==='Delivered').length;
+    document.getElementById('admin-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${total}</div><div class="stat-sub">All time</div></div>
+      <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value">&#8358;${revenue.toLocaleString()}</div><div class="stat-sub">Paid + processing</div></div>
+      <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value">${pending}</div><div class="stat-sub">Awaiting payment</div></div>
+      <div class="stat-card"><div class="stat-label">Delivered</div><div class="stat-value">${delivered}</div><div class="stat-sub">Completed</div></div>`;
+  }
+  function filterOrders(status,btn){
+    currentFilter=status;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAdminOrders();
+  }
+  function renderAdminOrders(){
+    const filtered=currentFilter==='All'?allOrders:allOrders.filter(o=>o.status===currentFilter);
+    const list=document.getElementById('admin-orders-list');
+    if(!filtered.length){list.innerHTML='<p class="no-orders-admin">No orders in this category.</p>';return;}
+    const sIcon={Pending:'🕐',Paid:'💳',Preparing:'👨‍🍳',Delivered:'✅'};
+    const nxt={Pending:'Paid',Paid:'Preparing',Preparing:'Delivered'};
+    list.innerHTML=[...filtered].reverse().map(o=>{
+      const s=o.status||'Pending';const ns=nxt[s];
+      return `<div class="admin-order-card">
+        <div class="aoc-header">
+          <div>
+            <div class="aoc-id">${o.id}</div>
+            <div class="aoc-customer">👤 ${o.name}</div>
+            <div class="aoc-contact">${o.phone?'📞 '+o.phone:''}${o.email?' ✉ '+o.email:''}</div>
+            <div class="aoc-items">${o.items.map(i=>i.name+' × '+i.quantity).join(' · ')}</div>
+            <div class="aoc-address">📍 ${o.location?.address||'No address'}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="aoc-total">&#8358;${(o.total||0).toLocaleString()}</div>
+            <span class="status-badge status-${s}">${sIcon[s]||'🕐'} ${s}</span>
+          </div>
+        </div>
+        ${statusStepper(s)}
+        <div class="aoc-actions">
+          ${ns?`<button class="aoc-advance-btn" onclick="adminAdvanceStatus('${o.id}','${ns}')">Mark as ${ns} →</button>`:'<span style="color:#2ECC71;font-weight:800;font-size:0.82rem">✅ Completed</span>'}
+          <button class="aoc-delete-btn" onclick="adminDeleteOrder('${o.id}')">🗑 Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  async function adminAdvanceStatus(id,newStatus){
+    try{
+      await fetch(API+'/api/orders/status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:newStatus})});
+      showToast('Order '+id+' → '+newStatus+' ✅');
+      loadAdminOrders();loadOrders();
+    }catch{showToast('Could not update status.',true);}
+  }
+  async function adminDeleteOrder(id){
+    if(!confirm('Delete this order permanently?'))return;
+    try{
+      await fetch(API+'/api/orders/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+      showToast('Order deleted.');loadAdminOrders();loadOrders();
+    }catch{showToast('Could not delete order.',true);}
+  }
+
+  /* ADDED: change password / username */
+  function changePassword(){
+    const cur=document.getElementById('set-cur-pass').value;
+    const nw=document.getElementById('set-new-pass').value;
+    const cf=document.getElementById('set-conf-pass').value;
+    if(cur!==ADMIN_PASS){showToast('Current password is wrong.',true);return;}
+    if(nw.length<6){showToast('Password must be at least 6 characters.',true);return;}
+    if(nw!==cf){showToast('Passwords do not match.',true);return;}
+    ADMIN_PASS=nw;lsSet('gf_admin_pass',ADMIN_PASS);
+    document.getElementById('set-cur-pass').value='';
+    document.getElementById('set-new-pass').value='';
+    document.getElementById('set-conf-pass').value='';
+    showToast('Password changed! 🔐');
+  }
+  function changeUsername(){
+    const pass=document.getElementById('set-user-pass').value;
+    const nw=document.getElementById('set-new-user').value.trim();
+    if(pass!==ADMIN_PASS){showToast('Wrong password.',true);return;}
+    if(!nw){showToast('Username cannot be empty.',true);return;}
+    ADMIN_USER=nw;lsSet('gf_admin_user',ADMIN_USER);
+    document.getElementById('set-user-pass').value='';
+    document.getElementById('set-new-user').value='';
+    showToast('Username updated to "'+ADMIN_USER+'" ✅');
+  }
+
+  /* ── ORIGINAL CODE BELOW — nothing changed ── */
 
   async function loadFlwConfig() {
     try {
@@ -383,7 +654,6 @@
     );
   }
 
-  /* ── PLACE ORDER + FLUTTERWAVE ── */
   async function placeOrder() {
     const name    = document.getElementById('customer-name').value.trim();
     const phone   = document.getElementById('customer-phone').value.trim();
@@ -415,7 +685,6 @@
     btn.disabled = true; btn.textContent = 'Creating order…';
 
     try {
-      // Step 1: Create order on backend (status = Pending)
       const res = await fetch(API + '/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -426,7 +695,6 @@
 
       btn.textContent = 'Opening payment…';
 
-      // Step 2: Open Flutterwave popup
       FlutterwaveCheckout({
         public_key: flwPublicKey,
         tx_ref: order.id + '-' + Date.now(),
@@ -444,7 +712,6 @@
         },
         callback: async function(response) {
           if (response.status === 'successful') {
-            // Step 3: Verify on backend
             try {
               const vRes = await fetch(API + '/api/payment/verify', {
                 method: 'POST',
@@ -454,7 +721,6 @@
               const vData = await vRes.json();
               if (vData.success) {
                 showToast(`✅ Payment confirmed! Order ${order.id} is now being prepared!`);
-                // WhatsApp notification
                 const itemText = items.map(i=>`${i.name} x${i.quantity}`).join(', ');
                 const msg = `🍮 PAID Order ${order.id}%0ACustomer: ${name}%0AItems: ${itemText}%0ATotal: ₦${total.toLocaleString()}%0AAddress: ${address}%0A✅ Payment CONFIRMED`;
                 const waRes = await fetch('/api/whatsapp');
@@ -509,7 +775,6 @@
     updateSummary(); updateCartCount();
   }
 
-  /* ── STATUS STEPPER ── */
   function statusStepper(currentStatus) {
     const steps = [
       {key:'Pending',   label:'Pending',   icon:'🕐'},
@@ -527,7 +792,7 @@
     return html + '</div>';
   }
 
-  /* ── ORDERS LIST ── */
+  /* CHANGED: buyer loadOrders — shows status stepper only, NO delete/advance buttons */
   async function loadOrders() {
     try {
       const res = await fetch(API + '/api/orders');
@@ -535,7 +800,6 @@
       const list = document.getElementById('orders-list');
       if (!orders || !orders.length) { list.innerHTML = '<p class="no-orders">No orders yet — be the first!</p>'; return; }
       const statusIcon = {Pending:'🕐',Paid:'💳',Preparing:'👨‍🍳',Delivered:'✅'};
-      const nextStatus = {Pending:'Paid',Paid:'Preparing',Preparing:'Delivered'};
       list.innerHTML = [...orders].reverse().map(o => {
         const status = o.status || 'Pending';
         return `
@@ -553,34 +817,9 @@
               </div>
             </div>
             ${statusStepper(status)}
-            <div class="order-card-actions">
-              ${nextStatus[status] ? `<button class="status-btn" onclick="advanceStatus('${o.id}','${nextStatus[status]}')">Mark as ${nextStatus[status]} →</button>` : ''}
-              <button class="delete-btn" onclick="deleteOrder('${o.id}')">🗑 Remove</button>
-            </div>
           </div>`;
       }).join('');
     } catch { /* server offline */ }
-  }
-
-  async function advanceStatus(id, newStatus) {
-    try {
-      await fetch(API + '/api/orders/status', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({id, status: newStatus})
-      });
-      loadOrders();
-    } catch { showToast('Could not update status.', true); }
-  }
-
-  async function deleteOrder(id) {
-    if (!confirm('Remove this order?')) return;
-    try {
-      await fetch('/api/orders/delete', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({id})
-      });
-      loadOrders();
-    } catch { showToast('Could not remove order.', true); }
   }
 
   function showToast(msg, error=false) {
@@ -594,7 +833,10 @@
     document.getElementById('order-section').scrollIntoView({behavior:'smooth'});
   }
 
-  loadFlwConfig(); loadMenu(); loadOrders();
+  loadFlwConfig();
+  loadMenu();
+  loadOrders();
+  checkAdminURL(); /* ADDED: opens admin login when ?admin is in the URL */
   setInterval(loadOrders, 10000);
 </script>
 </body>

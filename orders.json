@@ -1,27 +1,22 @@
 [
   {
-    "id": "ORD-0002",
+    "id": "ORD-0001",
     "items": [
       {
-        "name": "Yummy-Brown (small)",
-        "quantity": 1,
-        "price": 2500
-      },
-      {
-        "name": "Creamy-Custard (small) (Vanilla ×1, Banana ×1)",
-        "quantity": 2,
+        "name": "Creamy-Custard (small) (Banana ×3)",
+        "quantity": 3,
         "price": 1500
       }
     ],
-    "total": 5500,
+    "total": 4500,
     "name": "daniel akpa",
-    "phone": "07046676614",
+    "phone": "",
     "email": "dakpa313@gmail.com",
     "location": {
-      "address": "masaka, karu nasarawa state"
+      "address": "masaka nasarawa state"
     },
-    "created_at": "2026-03-08T12:51:23.539253989Z",
-    "status": "Pending",
-    "payment_id": ""
+    "created_at": "2026-03-09T01:03:56.469435913Z",
+    "status": "Delivered",
+    "payment_id": "10077978"
   }
 ]

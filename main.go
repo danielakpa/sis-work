@@ -33,13 +33,13 @@ func getFlwPublicKey() string {
 	if k := os.Getenv("FLW_PUBLIC_KEY"); k != "" {
 		return k
 	}
-	return "0ca40d74-4433-495f-a9de-b6ab42816a7a" // ← PASTE PUBLIC KEY HERE
+	return "FLWPUBK_TEST-bd98a6d3b88e2282cc7e3321bccc1309-X" // ← PASTE PUBLIC KEY HERE
 }
 func getFlwSecretKey() string {
 	if k := os.Getenv("FLW_SECRET_KEY"); k != "" {
 		return k
 	}
-	return "mf3A82VVmu0hbU10Fv9BLEeTlBz90lp3" // ← PASTE SECRET KEY HERE
+	return "FLWSECK_TEST-dcae97052935dd3a476200260f124d0b-X" // ← PASTE SECRET KEY HERE
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -417,7 +417,7 @@ func deleteOrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ordersMu.Lock()
+	ordersMu.Lock()http://localhost:8080
 	newOrders := []Order{}
 	for _, o := range orders {
 		if o.ID != req.ID {
